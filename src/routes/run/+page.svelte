@@ -4,35 +4,58 @@
     import { onMount } from 'svelte';
 
     let sceneContainer:any = null;
+    let scene:THREE.Scene = new THREE.Scene();
+    let camera:THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
+    let renderer:THREE.WebGLRenderer | null;
+    let mesh:any = {};
+
+    $: sceneContainerRect = sceneContainer?.getBoundingClientRect();
+    $: width = sceneContainerRect?.width;
+    $: height = sceneContainerRect?.height;
+    
+    $: renderer?.setSize(width, height);
+    $: if (width && height) {
+        camera.fov = 75;
+        camera.aspect = width / height;
+        camera.near = 0.1;
+        camera.far = 1000;
+        camera.position.z = 5;
+        camera.updateProjectionMatrix();
+    }
 
     onMount(() => {
-        const sceneContainerRect = sceneContainer.getBoundingClientRect();
-        const width = sceneContainerRect.width;
-        const height = sceneContainerRect.height;
+        console.log("[lifecycle] mounting");
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-
-        const renderer = new THREE.WebGLRenderer();
-        renderer.setSize(width, height);
+        renderer = new THREE.WebGLRenderer();
         sceneContainer.appendChild( renderer.domElement );
-
-        const geom = new THREE.BoxGeometry(1, 1, 1);
-        const mat = new THREE.MeshBasicMaterial({color: 0x00ff00 });
-        const cube = new THREE.Mesh(geom, mat);
-
-        scene.add(cube);
-        camera.position.z = 5;
-
-        function animate() {
-            requestAnimationFrame(animate);
-            renderer.render(scene, camera);
-        }
-
+        addMesh();
         animate();
+
+        console.log("[lifecycle] mounted");
     });
 
-    
+    function animate() {
+        requestAnimationFrame(animate);
+
+        animateMesh();
+        
+        if (scene && camera) {
+            renderer?.render(scene, camera)
+        }
+    }
+
+    function addMesh() {
+        const geom:THREE.BoxGeometry = new THREE.BoxGeometry(1, 1, 1);
+        const mat:THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
+        const cube:THREE.Mesh = new THREE.Mesh(geom, mat);
+        mesh.cube = cube;
+        scene?.add(cube);
+    }
+
+    function animateMesh() {
+        mesh.cube.rotation.x += 0.01;
+        mesh.cube.rotation.y += 0.01;
+    }
 
 </script>
 
@@ -45,7 +68,7 @@
 
 <style>
     #scene-container {
-        width: 1600px;
-        height: 900px;
+        width: 80vw;
+        height: 80vh;
     }
 </style>
