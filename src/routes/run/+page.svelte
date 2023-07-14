@@ -19,7 +19,6 @@
         camera.aspect = width / height;
         camera.near = 0.1;
         camera.far = 1000;
-        camera.position.z = 5;
         camera.updateProjectionMatrix();
     }
 
@@ -30,6 +29,8 @@
         sceneContainer.appendChild( renderer.domElement );
         addMesh();
         animate();
+
+        document.addEventListener('keydown', handleKeyDown);
 
         console.log("[lifecycle] mounted");
     });
@@ -48,6 +49,7 @@
         const geom:THREE.BoxGeometry = new THREE.BoxGeometry(1, 1, 1);
         const mat:THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
         const cube:THREE.Mesh = new THREE.Mesh(geom, mat);
+        cube.position.z = -5;
         mesh.cube = cube;
         scene?.add(cube);
     }
@@ -57,10 +59,28 @@
         mesh.cube.rotation.y += 0.01;
     }
 
+    function handleKeyDown(e:KeyboardEvent) {
+        const key = e.key;
+        const keyTL = key.toLowerCase();
+        console.log(`[event] keydown -> ${key}`);
+
+        if (keyTL === 'a') {
+            camera.position.x -= 0.1;
+        }
+        if (keyTL === 'd') {
+            camera.position.x += 0.1;
+        }
+        if (keyTL === 'w') {
+            camera.position.z -= 0.1;
+        }
+        if (keyTL === 's') {
+            camera.position.z += 0.1;
+        }
+    }
+
 </script>
 
 <div>
-
     <div id="scene-container" bind:this={ sceneContainer }>
 
     </div>
