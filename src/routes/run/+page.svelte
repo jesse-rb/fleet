@@ -8,6 +8,7 @@
     let camera:THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
     let renderer:THREE.WebGLRenderer | null;
     let mesh:any = {};
+    let keys:any = {};
 
     $: sceneContainerRect = sceneContainer?.getBoundingClientRect();
     $: width = sceneContainerRect?.width;
@@ -29,8 +30,10 @@
         sceneContainer.appendChild( renderer.domElement );
         addMesh();
         animate();
+        handleKeys();
 
-        document.addEventListener('keydown', handleKeyDown);
+        document.addEventListener('keydown', setKeys);
+        document.addEventListener('keyup', setKeys);
 
         console.log("[lifecycle] mounted");
     });
@@ -59,30 +62,46 @@
         mesh.cube.rotation.y += 0.01;
     }
 
-    function handleKeyDown(e:KeyboardEvent) {
+    async function setKeys(e:KeyboardEvent) {
         const key = e.key;
-        const keyTL = key.toLowerCase();
-        console.log(`[event] keydown -> ${key}`);
 
-        if (keyTL === 'a') {
-            camera.position.x -= 0.1;
+        if (e.type === 'keydown') {
+            keys[key] = 1;
         }
-        if (keyTL === 'd') {
-            camera.position.x += 0.1;
+        else {
+            delete keys[key];
         }
-        if (keyTL === 'w') {
-            camera.position.z -= 0.1;
+    }
+
+    function handleKeys() {
+        for (let k of Object.keys(keys)) {
+
+            const kLower = k.toLowerCase();
+
+            if (kLower === 'a') {
+                camera.position.x -= 0.1;
+            }
+            if (kLower === 'd') {
+                camera.position.x += 0.1;
+            }
+            if (kLower === 'w') {
+                camera.position.z -= 0.1;
+            }
+            if (kLower === 's') {
+                camera.position.z += 0.1;
+            }
         }
-        if (keyTL === 's') {
-            camera.position.z += 0.1;
-        }
+        requestAnimationFrame(handleKeys);
     }
 
 </script>
 
 <div>
-    <div id="scene-container" bind:this={ sceneContainer }>
-
+    <div id="scene-container" bind:this={ sceneContainer }></div>
+    <div class="text-4xl">
+        { #each Object.keys(keys) as k }
+            <span>{ k }</span>
+        { /each }
     </div>
 </div>
 
