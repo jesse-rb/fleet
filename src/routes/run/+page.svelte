@@ -3,6 +3,8 @@
     import * as THREE from 'three';
     import { onMount } from 'svelte';
 
+    const vUp = new THREE.Vector3(0, 1, 0);
+
     let sceneContainer:any = null;
     let scene:THREE.Scene = new THREE.Scene();
     let camera:THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
@@ -78,17 +80,27 @@
 
             const kLower = k.toLowerCase();
 
+            const vForward = new THREE.Vector3();
+            camera.getWorldDirection(vForward).normalize().multiplyScalar(0.1);
+            const vRight: THREE.Vector3 = new THREE.Vector3().crossVectors(vForward, vUp).normalize().multiplyScalar(0.1);;
+
             if (kLower === 'a') {
-                camera.position.x -= 0.1;
+                camera.position.sub(vRight);
             }
             if (kLower === 'd') {
-                camera.position.x += 0.1;
+                camera.position.add(vRight);
             }
             if (kLower === 'w') {
-                camera.position.z -= 0.1;
+                camera.position.add(vForward);
             }
             if (kLower === 's') {
-                camera.position.z += 0.1;
+                camera.position.sub(vForward);
+            }
+            if (kLower === 'q') {
+                camera.rotateY(0.01);
+            }
+            if (kLower === 'e') {
+                camera.rotateY(-0.01);
             }
         }
         requestAnimationFrame(handleKeys);
