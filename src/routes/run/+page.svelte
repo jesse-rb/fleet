@@ -3,14 +3,18 @@
     import * as THREE from 'three';
     import { onMount } from 'svelte';
 
-    const vUp = new THREE.Vector3(0, 1, 0);
-
     let sceneContainer:any = null;
     let scene:THREE.Scene = new THREE.Scene();
     let camera:THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
-    let renderer:THREE.WebGLRenderer | null;
+    let renderer:THREE.WebGLRenderer|null;
     let mesh:any = {};
     let keys:any = {};
+    let mouseX:number = 0;
+    let mouseY:number = 0;
+    let mouseMovementX:number = 0;
+    let mouseMovementY:number = 0;
+    let mouseDown:boolean = false;
+    let mouseMoving:boolean = false;
 
     $: sceneContainerRect = sceneContainer?.getBoundingClientRect();
     $: width = sceneContainerRect?.width;
@@ -33,9 +37,13 @@
         addMesh();
         animate();
         handleKeys();
+        handleMouse();
 
         document.addEventListener('keydown', setKeys);
         document.addEventListener('keyup', setKeys);
+        sceneContainer.addEventListener('mousedown', setMouse);
+        sceneContainer.addEventListener('mouseup', setMouse);
+        sceneContainer.addEventListener('mousemove', setMouse);
 
         console.log("[lifecycle] mounted");
     });
@@ -60,11 +68,11 @@
     }
 
     function animateMesh() {
-        mesh.cube.rotation.x += 0.01;
-        mesh.cube.rotation.y += 0.01;
+        mesh.cube.rotation.x += 0.001;
+        mesh.cube.rotation.y += 0.001;
     }
 
-    async function setKeys(e:KeyboardEvent) {
+    function setKeys(e:KeyboardEvent) {
         const key = e.key;
 
         if (e.type === 'keydown') {
@@ -75,6 +83,26 @@
         }
     }
 
+    function setMouse(e:MouseEvent) {
+        switch (e.type) {
+            case 'mousedown':
+                mouseDown = true;
+                break;
+            case 'mouseup':
+                mouseDown = false;
+                break;
+            case 'mousemove':
+                mouseMoving = true;
+
+                mouseMovementX = e.offsetX - mouseX;
+                mouseMovementY = e.offsetY - mouseY;
+
+                mouseX = e.offsetX;
+                mouseY = e.offsetY;
+                break;
+        }
+    }
+
     function handleKeys() {
         for (let k of Object.keys(keys)) {
 
@@ -82,7 +110,11 @@
 
             const vForward = new THREE.Vector3();
             camera.getWorldDirection(vForward).normalize().multiplyScalar(0.1);
-            const vRight: THREE.Vector3 = new THREE.Vector3().crossVectors(vForward, vUp).normalize().multiplyScalar(0.1);;
+            const vUp = new THREE.Vector3(0, 1, 0);
+            const cameraUp:THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
+            cameraUp.copy(camera);
+            cameraUp.rotateX(Math.PI/2).getWorldDirection(vUp).normalize().multiplyScalar(0.1);
+            const vRight: THREE.Vector3 = new THREE.Vector3().crossVectors(vForward, vUp).normalize().multiplyScalar(0.1);
 
             if (kLower === 'a') {
                 camera.position.sub(vRight);
@@ -97,13 +129,22 @@
                 camera.position.sub(vForward);
             }
             if (kLower === 'q') {
-                camera.rotateY(0.01);
+                camera.rotateZ(0.01);
             }
             if (kLower === 'e') {
-                camera.rotateY(-0.01);
+                camera.rotateZ(-0.01);
             }
         }
         requestAnimationFrame(handleKeys);
+    }
+
+    function handleMouse() {
+        if (mouseDown && mouseMoving) {
+            camera.rotateY(mouseMovementX*0.01);
+            camera.rotateX(mouseMovementY*0.01);
+        }
+        mouseMoving = false;
+        requestAnimationFrame(handleMouse);
     }
 
 </script>
