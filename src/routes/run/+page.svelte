@@ -66,7 +66,7 @@
     }
 
     function addMesh() {
-        loader.load( 'src/resources/models/ship2.glb', function ( gltf ) {
+        loader.load( '/models/ship2.glb', function ( gltf ) {
             mesh.ship = gltf.scene;
             mesh.ship.position.z = -5;
             scene.add( mesh.ship );
