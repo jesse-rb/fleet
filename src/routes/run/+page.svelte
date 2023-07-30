@@ -1,12 +1,14 @@
 <script lang="ts">
     // @ts-ignore TODO: quick fix
     import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
     import { onMount } from 'svelte';
 
     let sceneContainer:any = null;
     let scene:THREE.Scene = new THREE.Scene();
     let camera:THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
     let renderer:THREE.WebGLRenderer|null;
+    const loader = new GLTFLoader();
     let mesh:any = {};
     let keys:any = {};
     let mouseX:number = 0;
@@ -39,37 +41,46 @@
         handleKeys();
         handleMouse();
 
+        const pointLight = new THREE.PointLight( 0xfffefe, 1, 100);
+        pointLight.position.set( 20, 20, 20 );
+        scene.add( pointLight );
+
+        const sphereSize = 1;
+        const pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize );
+        scene.add( pointLightHelper );
+
         document.addEventListener('keydown', setKeys);
         document.addEventListener('keyup', setKeys);
         sceneContainer.addEventListener('mousedown', setMouse);
         sceneContainer.addEventListener('mouseup', setMouse);
         sceneContainer.addEventListener('mousemove', setMouse);
+        sceneContainer.addEventListener('contextmenu', setMouse);
 
         console.log("[lifecycle] mounted");
     });
 
     function animate() {
-        requestAnimationFrame(animate);
-
         animateMesh();
-        
-        if (scene && camera) {
-            renderer?.render(scene, camera)
-        }
+        renderer?.render(scene, camera)
+        requestAnimationFrame(animate);
     }
 
     function addMesh() {
-        const geom:THREE.BoxGeometry = new THREE.BoxGeometry(1, 1, 1);
-        const mat:THREE.MeshBasicMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00});
-        const cube:THREE.Mesh = new THREE.Mesh(geom, mat);
-        cube.position.z = -5;
-        mesh.cube = cube;
-        scene?.add(cube);
+        loader.load( 'src/resources/models/ship2.glb', function ( gltf ) {
+            mesh.ship = gltf.scene;
+            mesh.ship.position.z = -5;
+            scene.add( mesh.ship );
+        }, undefined, ( error ) => console.error( error ));
+        // ship.position.z = -5;
+        // mesh.ship = ship;
+        // scene.add(ship);
     }
 
     function animateMesh() {
-        mesh.cube.rotation.x += 0.001;
-        mesh.cube.rotation.y += 0.001;
+        if (mesh.ship) {
+            mesh.ship.rotation.x += 0.001;
+            mesh.ship.rotation.y += 0.001;
+        }
     }
 
     function setKeys(e:KeyboardEvent) {
@@ -84,22 +95,28 @@
     }
 
     function setMouse(e:MouseEvent) {
+        e.preventDefault();
         switch (e.type) {
             case 'mousedown':
                 mouseDown = true;
                 break;
+
             case 'mouseup':
                 mouseDown = false;
                 break;
+
             case 'mousemove':
                 mouseMoving = true;
-
                 mouseMovementX = e.offsetX - mouseX;
                 mouseMovementY = e.offsetY - mouseY;
-
                 mouseX = e.offsetX;
                 mouseY = e.offsetY;
                 break;
+
+            case 'contextmenu':
+                // TODO: selecting
+                break;
+
         }
     }
 
@@ -134,6 +151,12 @@
             if (kLower === 'e') {
                 camera.rotateZ(-0.01);
             }
+            if (kLower === 'r') {
+                camera.position.add(vUp);
+            }
+            if (kLower === 'f') {
+                camera.position.sub(vUp);
+            }
         }
         requestAnimationFrame(handleKeys);
     }
@@ -143,6 +166,7 @@
             camera.rotateY(mouseMovementX*0.01);
             camera.rotateX(mouseMovementY*0.01);
         }
+        
         mouseMoving = false;
         requestAnimationFrame(handleMouse);
     }
@@ -150,8 +174,9 @@
 </script>
 
 <div>
-    <div id="scene-container" bind:this={ sceneContainer }></div>
+    <div id="scene-container" class="cursor-crosshair w-85% h-[85vh]"bind:this={ sceneContainer }></div>
     <div class="text-4xl">
+        <span>keys:</span>
         { #each Object.keys(keys) as k }
             <span>{ k }</span>
         { /each }
@@ -159,8 +184,5 @@
 </div>
 
 <style>
-    #scene-container {
-        width: 80vw;
-        height: 80vh;
-    }
+    
 </style>
