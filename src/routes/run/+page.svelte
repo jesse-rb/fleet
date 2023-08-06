@@ -1,15 +1,17 @@
 <script lang="ts">
     // @ts-ignore TODO: quick fix
     import * as THREE from 'three';
+    // @ts-ignore TODO: quick fix
     import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
     import { onMount } from 'svelte';
+
 
     let sceneContainer:any = null;
     let scene:THREE.Scene = new THREE.Scene();
     let camera:THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
     let renderer:THREE.WebGLRenderer|null;
     const loader = new GLTFLoader();
-    let mesh:any = {};
+    let ships:any = {};
     let keys:any = {};
     let mouseX:number = 0;
     let mouseY:number = 0;
@@ -36,7 +38,7 @@
 
         renderer = new THREE.WebGLRenderer();
         sceneContainer.appendChild( renderer.domElement );
-        addMesh();
+        addShip();
         animate();
         handleKeys();
         handleMouse();
@@ -60,26 +62,24 @@
     });
 
     function animate() {
-        animateMesh();
+        animateShips();
         renderer?.render(scene, camera)
         requestAnimationFrame(animate);
     }
 
-    function addMesh() {
-        loader.load( '/models/ship2.glb', function ( gltf ) {
-            mesh.ship = gltf.scene;
-            mesh.ship.position.z = -5;
-            scene.add( mesh.ship );
-        }, undefined, ( error ) => console.error( error ));
-        // ship.position.z = -5;
-        // mesh.ship = ship;
-        // scene.add(ship);
+    function addShip() {
+
+        loader.load( '/models/ship2.glb', function ( gltf:any ) {
+            ships.ship = gltf.scene;
+            ships.ship.position.z = -5;
+            scene.add( ships.ship );
+        }, undefined, ( error:any ) => console.error( error ));
     }
 
-    function animateMesh() {
-        if (mesh.ship) {
-            mesh.ship.rotation.x += 0.001;
-            mesh.ship.rotation.y += 0.001;
+    function animateShips() {
+        if (ships.ship) {
+            ships.ship.rotation.x += 0.001;
+            ships.ship.rotation.y += 0.001;
         }
     }
 
