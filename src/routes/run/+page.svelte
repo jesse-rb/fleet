@@ -1,16 +1,9 @@
 <script lang="ts">
     // @ts-ignore TODO: quick fix
-    import * as THREE from 'three';
-    // @ts-ignore TODO: quick fix
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
     import { onMount } from 'svelte';
 
 
     let sceneContainer:any = null;
-    let scene:THREE.Scene = new THREE.Scene();
-    let camera:THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
-    let renderer:THREE.WebGLRenderer|null;
-    const loader = new GLTFLoader();
     let ships:any = {};
     let keys:any = {};
     let mouseX:number = 0;
@@ -69,12 +62,7 @@
 
     function addShip() {
 
-        loader.load( '/models/ship2.glb', function ( gltf:any ) {
-            ships.ship = gltf.scene;
-            ships.ship.position.z = -5;
-            scene.add( ships.ship );
-        }, undefined, ( error:any ) => console.error( error ));
-    }
+            }
 
     function animateShips() {
         if (ships.ship) {
