@@ -1,6 +1,8 @@
 <script lang="ts">
     // @ts-ignore TODO: quick fix
     import { onMount } from 'svelte';
+    import * as THREE from 'three';
+    import { renderer, camera, initRenderer } from '../common/three';
 
 
     let sceneContainer:any = null;
@@ -28,9 +30,8 @@
 
     onMount(() => {
         console.log("[lifecycle] mounting");
-
-        renderer = new THREE.WebGLRenderer();
-        sceneContainer.appendChild( renderer.domElement );
+        
+        initRenderer();
         addShip();
         animate();
         handleKeys();
