@@ -22,10 +22,6 @@ export default class Body implements Body {
         return this.scene;
     }
 
-    setModel = function(this:Body, filePath:string) {
-        this.model = filePath;
-    }
-
     setScene(scene:any) {
         this.scene = scene;
     }

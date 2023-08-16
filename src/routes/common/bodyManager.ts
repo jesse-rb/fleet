@@ -1,16 +1,17 @@
 import type Body from "./body";
 import { loader } from './three';
+import { scene } from "./three";
 
-class bodyManager {
+export class BodyManager {
     bodies:Array<Body> = [];
 
     add(body:Body) {
         this.bodies.push(body);
-        loader.load( '/models/ship2.glb', function ( gltf:any ) {
-            const scene:THREE.Scene = gltf.scene;
-            body.setScene(scene);
-            scene.position.z = -5;
-            scene.add( ships.ship );
+        loader.load(body.model , function ( gltf:any ) {
+            const bodyScene:THREE.Scene = gltf.scene;
+            body.setScene(bodyScene);
+            bodyScene.position.z = -5;
+            scene.add( bodyScene );
         }, undefined, ( error:any ) => console.error( error ));
 
     }

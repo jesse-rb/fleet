@@ -2,8 +2,9 @@
     // @ts-ignore TODO: quick fix
     import { onMount } from 'svelte';
     import * as THREE from 'three';
-    import { renderer, camera, initRenderer } from '../common/three';
-
+    import { renderer, camera, initRenderer, scene } from '../common/three';
+    import { BodyManager } from '../common/bodyManager';
+    import Body from '../common/body';
 
     let sceneContainer:any = null;
     let ships:any = {};
@@ -14,6 +15,11 @@
     let mouseMovementY:number = 0;
     let mouseDown:boolean = false;
     let mouseMoving:boolean = false;
+    const bodyManager = new BodyManager();
+
+    const flagship = new Body();
+    flagship.model = '/models/ship2.glb';
+    bodyManager.add(flagship);
 
     $: sceneContainerRect = sceneContainer?.getBoundingClientRect();
     $: width = sceneContainerRect?.width;
@@ -31,8 +37,7 @@
     onMount(() => {
         console.log("[lifecycle] mounting");
         
-        initRenderer();
-        addShip();
+        initRenderer(sceneContainer);
         animate();
         handleKeys();
         handleMouse();
@@ -56,14 +61,10 @@
     });
 
     function animate() {
-        animateShips();
+        //animateShips();
         renderer?.render(scene, camera)
         requestAnimationFrame(animate);
     }
-
-    function addShip() {
-
-            }
 
     function animateShips() {
         if (ships.ship) {
