@@ -2,7 +2,7 @@
     // @ts-ignore TODO: quick fix
     import { onMount } from 'svelte';
     import * as THREE from 'three';
-    import { renderer, camera, initRenderer, scene } from '../common/three';
+    import { renderer, camera, initRenderer, scene, getForwardVector3, getUpVector3, getRightVector3 } from '../common/three';
     import { BodyManager } from '../common/bodyManager';
     import Body from '../common/body';
 
@@ -16,10 +16,6 @@
     let mouseDown:boolean = false;
     let mouseMoving:boolean = false;
     const bodyManager = new BodyManager();
-
-    const flagship = new Body();
-    flagship.model = '/models/ship2.glb';
-    bodyManager.add(flagship);
 
     $: sceneContainerRect = sceneContainer?.getBoundingClientRect();
     $: width = sceneContainerRect?.width;
@@ -50,6 +46,10 @@
         const pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize );
         scene.add( pointLightHelper );
 
+        const flagship = new Body({x:0, y:0, z:-5}, {x:0, y:0, z:0}, {x:0.01, y:0, z:0}, {x:0, y:0.001, z:0}, {x:0.000001, y:0, z:0});
+        flagship.model = '/models/ship2.glb';
+        bodyManager.add(flagship);
+
         document.addEventListener('keydown', setKeys);
         document.addEventListener('keyup', setKeys);
         sceneContainer.addEventListener('mousedown', setMouse);
@@ -61,16 +61,9 @@
     });
 
     function animate() {
-        //animateShips();
+        bodyManager.animate();
         renderer?.render(scene, camera)
         requestAnimationFrame(animate);
-    }
-
-    function animateShips() {
-        if (ships.ship) {
-            ships.ship.rotation.x += 0.001;
-            ships.ship.rotation.y += 0.001;
-        }
     }
 
     function setKeys(e:KeyboardEvent) {
@@ -115,13 +108,9 @@
 
             const kLower = k.toLowerCase();
 
-            const vForward = new THREE.Vector3();
-            camera.getWorldDirection(vForward).normalize().multiplyScalar(0.1);
-            const vUp = new THREE.Vector3(0, 1, 0);
-            const cameraUp:THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
-            cameraUp.copy(camera);
-            cameraUp.rotateX(Math.PI/2).getWorldDirection(vUp).normalize().multiplyScalar(0.1);
-            const vRight: THREE.Vector3 = new THREE.Vector3().crossVectors(vForward, vUp).normalize().multiplyScalar(0.1);
+            const vForward:THREE.Vector3 = getForwardVector3(camera);
+            const vUp:THREE.Vector3 = getUpVector3(camera);
+            const vRight:THREE.Vector3 = getRightVector3(camera);
 
             if (kLower === 'a') {
                 camera.position.sub(vRight);

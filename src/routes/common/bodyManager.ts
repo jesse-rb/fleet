@@ -10,9 +10,14 @@ export class BodyManager {
         loader.load(body.model , function ( gltf:any ) {
             const bodyScene:THREE.Scene = gltf.scene;
             body.setScene(bodyScene);
-            bodyScene.position.z = -5;
             scene.add( bodyScene );
         }, undefined, ( error:any ) => console.error( error ));
 
+    }
+
+    animate() {
+        for(const b of this.bodies) {
+            b.animate();
+        }
     }
 }
