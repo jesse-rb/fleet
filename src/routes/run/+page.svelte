@@ -4,7 +4,7 @@
     import * as THREE from 'three';
     import { renderer, camera, initRenderer, scene, getForwardVector3, getUpVector3, getRightVector3 } from '../common/three';
     import { BodyManager } from '../common/bodyManager';
-    import Body from '../common/body';
+    import Ship from '../ship/ship';
 
     let sceneContainer:any = null;
     let ships:any = {};
@@ -27,6 +27,9 @@
         camera.aspect = width / height;
         camera.near = 0.1;
         camera.far = 1000;
+        camera.position.z = 50;
+        camera.position.y = 50;
+        camera.rotation.x = Math.PI/(-4);
         camera.updateProjectionMatrix();
     }
 
@@ -46,8 +49,9 @@
         const pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize );
         scene.add( pointLightHelper );
 
-        const flagship = new Body({x:0, y:0, z:-5}, {x:0, y:0, z:0}, {x:0.01, y:0, z:0}, {x:0, y:0.001, z:0}, {x:0.000001, y:0, z:0});
+        const flagship = new Ship();
         flagship.model = '/models/ship2.glb';
+        flagship.ai();
         bodyManager.add(flagship);
 
         document.addEventListener('keydown', setKeys);
@@ -61,6 +65,7 @@
     });
 
     function animate() {
+        
         bodyManager.animate();
         renderer?.render(scene, camera)
         requestAnimationFrame(animate);

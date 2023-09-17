@@ -1,21 +1,21 @@
-import type { Scene } from 'three';
+import { Vector3, type Scene } from 'three';
 import type { Point } from './common'
 
 export default class Body implements Body {
     // Fundamentals
     position:Point;
     rotation:Point;
-    velocity:Point;
-    velocityRotational:Point;
-    thrust:Point;
-    thrustRotational:Point;
+    velocity:Vector3;
+    velocityRotational:Vector3;
+    thrust:Vector3;
+    thrustRotational:Vector3;
     mass:number;
 
     // Threejs
     model:string|null = null;
     private scene:THREE.Scene|null = null;
 
-    constructor(pos:Point={x:0,y:0,z:0}, rot:Point={x:0,y:0,z:0}, vel:Point={x:0,y:0,z:0}, velRot:Point={x:0,y:0,z:0}, thrust:Point={x:0,y:0,z:0}, thrustRot:Point={x:0,y:0,z:0}, mass:number=1) {
+    constructor(pos:Point={x:0,y:0,z:0}, rot:Point={x:0,y:0,z:0}, vel:Vector3=new Vector3(0, 0, 0), velRot:Vector3=new Vector3(0, 0, 0), thrust:Vector3=new Vector3(0, 0, 0), thrustRot:Vector3=new Vector3(0, 0, 0), mass:number=1) {
         this.position = pos;
         this.rotation = rot;
         this.velocity = vel;
@@ -29,6 +29,11 @@ export default class Body implements Body {
         return this.scene;
     }
 
+    setScene(scene:Scene) {
+        this.scene = scene;
+        this.updateScene();
+    }
+
     private updateScene() {
         if (this.scene) {
             this.scene.position.x = this.position.x;
@@ -40,24 +45,9 @@ export default class Body implements Body {
         }
     }
 
-    setScene(scene:Scene) {
-        this.scene = scene;
-        this.updateScene();
-    }
-
-    thrustToVel(rot:number, thrust:number) {
-        let fn = (((rot%Math.PI)/Math.PI)-(1/2))*2;
-        fn = Math.abs(fn);
-        //console.log(rot/Math.PI+'pi');
-        //console.log(fn);
-        const vel = fn*thrust;
-        console.log(vel);
-        return vel;
-    }
-
     animate() {
-        this.velocity.x += this.thrustToVel(this.rotation.y, this.thrust.x);
-        this.velocity.z += this.thrustToVel(this.rotation.y, this.thrust.x);
+        this.velocity.add(this.thrust);
+        this.velocityRotational.add(this.thrustRotational);
 
         this.position.x += this.velocity.x;
         this.position.y += this.velocity.y;
