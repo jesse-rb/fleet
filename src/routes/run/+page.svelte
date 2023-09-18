@@ -53,6 +53,13 @@
         flagship.model = '/models/ship2.glb';
         flagship.ai();
         bodyManager.add(flagship);
+        const fleet = [];
+        for (let i = 0; i < 100; i++) {
+            const fleetShip = new Ship();
+            fleetShip.model = '/models/ship2.glb';
+            fleetShip.ai();
+            bodyManager.add(fleetShip);
+        }
 
         document.addEventListener('keydown', setKeys);
         document.addEventListener('keyup', setKeys);
