@@ -54,7 +54,7 @@
         flagship.ai();
         bodyManager.add(flagship);
         const fleet = [];
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 5; i++) {
             const fleetShip = new Ship();
             fleetShip.model = '/models/ship2.glb';
             fleetShip.ai();
