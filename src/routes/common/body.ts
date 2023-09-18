@@ -9,6 +9,7 @@ export default class Body implements Body {
     velocityRotational:Vector3;
     thrust:Vector3;
     thrustRotational:Vector3;
+    interialDampners:boolean=true;
     mass:number;
 
     // Threejs
@@ -46,6 +47,7 @@ export default class Body implements Body {
     }
 
     animate() {
+        
         this.velocity.add(this.thrust);
         this.velocityRotational.add(this.thrustRotational);
 
@@ -55,6 +57,10 @@ export default class Body implements Body {
         this.rotation.x += this.velocityRotational.x;
         this.rotation.y += this.velocityRotational.y;
         this.rotation.z += this.velocityRotational.z;
+
+        if ( this.interialDampners && !this.velocity.equals(new Vector3(0, 0, 0)) ) {
+            this.thrust.add(new Vector3(0, 0, 0).sub(this.velocity.normalize().multiplyScalar(0.01)));
+        }
 
         if (this.scene) {
             this.updateScene();

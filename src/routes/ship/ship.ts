@@ -11,7 +11,7 @@ export default class Ship extends Body {
             if ( vRight < new Vector3(0, 0, 0) ) {
                 this.thrust.sub(vRight.multiplyScalar(0.01));
             }
-            this.thrust.add(vForward.multiplyScalar(0.0001));
+            this.thrust = vForward.multiplyScalar(0.0001);
             this.thrustRotational.randomDirection().multiplyScalar(0.00001);
         }
         requestAnimationFrame(()=>this.ai());
