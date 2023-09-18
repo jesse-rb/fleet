@@ -1,15 +1,13 @@
 <script lang="ts">
     // @ts-ignore TODO: quick fix
-    import * as THREE from 'three';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
     import { onMount } from 'svelte';
+    import * as THREE from 'three';
+    import { renderer, camera, initRenderer, scene, getForwardVector3, getUpVector3, getRightVector3 } from '../common/three';
+    import { BodyManager } from '../common/bodyManager';
+    import Ship from '../ship/ship';
 
     let sceneContainer:any = null;
-    let scene:THREE.Scene = new THREE.Scene();
-    let camera:THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
-    let renderer:THREE.WebGLRenderer|null;
-    const loader = new GLTFLoader();
-    let mesh:any = {};
+    let ships:any = {};
     let keys:any = {};
     let mouseX:number = 0;
     let mouseY:number = 0;
@@ -17,6 +15,7 @@
     let mouseMovementY:number = 0;
     let mouseDown:boolean = false;
     let mouseMoving:boolean = false;
+    const bodyManager = new BodyManager();
 
     $: sceneContainerRect = sceneContainer?.getBoundingClientRect();
     $: width = sceneContainerRect?.width;
@@ -28,15 +27,16 @@
         camera.aspect = width / height;
         camera.near = 0.1;
         camera.far = 1000;
+        camera.position.z = 50;
+        camera.position.y = 50;
+        camera.rotation.x = Math.PI/(-4);
         camera.updateProjectionMatrix();
     }
 
     onMount(() => {
         console.log("[lifecycle] mounting");
-
-        renderer = new THREE.WebGLRenderer();
-        sceneContainer.appendChild( renderer.domElement );
-        addMesh();
+        
+        initRenderer(sceneContainer);
         animate();
         handleKeys();
         handleMouse();
@@ -49,6 +49,18 @@
         const pointLightHelper = new THREE.PointLightHelper( pointLight, sphereSize );
         scene.add( pointLightHelper );
 
+        const flagship = new Ship();
+        flagship.model = '/models/ship2.glb';
+        flagship.ai();
+        bodyManager.add(flagship);
+        const fleet = [];
+        for (let i = 0; i < 5; i++) {
+            const fleetShip = new Ship();
+            fleetShip.model = '/models/ship2.glb';
+            fleetShip.ai();
+            bodyManager.add(fleetShip);
+        }
+
         document.addEventListener('keydown', setKeys);
         document.addEventListener('keyup', setKeys);
         sceneContainer.addEventListener('mousedown', setMouse);
@@ -60,27 +72,10 @@
     });
 
     function animate() {
-        animateMesh();
+        
+        bodyManager.animate();
         renderer?.render(scene, camera)
         requestAnimationFrame(animate);
-    }
-
-    function addMesh() {
-        loader.load( '/models/ship2.glb', function ( gltf ) {
-            mesh.ship = gltf.scene;
-            mesh.ship.position.z = -5;
-            scene.add( mesh.ship );
-        }, undefined, ( error ) => console.error( error ));
-        // ship.position.z = -5;
-        // mesh.ship = ship;
-        // scene.add(ship);
-    }
-
-    function animateMesh() {
-        if (mesh.ship) {
-            mesh.ship.rotation.x += 0.001;
-            mesh.ship.rotation.y += 0.001;
-        }
     }
 
     function setKeys(e:KeyboardEvent) {
@@ -125,13 +120,9 @@
 
             const kLower = k.toLowerCase();
 
-            const vForward = new THREE.Vector3();
-            camera.getWorldDirection(vForward).normalize().multiplyScalar(0.1);
-            const vUp = new THREE.Vector3(0, 1, 0);
-            const cameraUp:THREE.PerspectiveCamera = new THREE.PerspectiveCamera();
-            cameraUp.copy(camera);
-            cameraUp.rotateX(Math.PI/2).getWorldDirection(vUp).normalize().multiplyScalar(0.1);
-            const vRight: THREE.Vector3 = new THREE.Vector3().crossVectors(vForward, vUp).normalize().multiplyScalar(0.1);
+            const vForward:THREE.Vector3 = getForwardVector3(camera);
+            const vUp:THREE.Vector3 = getUpVector3(camera);
+            const vRight:THREE.Vector3 = getRightVector3(camera);
 
             if (kLower === 'a') {
                 camera.position.sub(vRight);
