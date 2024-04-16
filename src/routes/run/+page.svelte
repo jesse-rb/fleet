@@ -50,13 +50,13 @@
         scene.add( pointLightHelper );
 
         const flagship = new Ship();
-        flagship.model = '/models/ship2.glb';
+        flagship.setModel('/models/ship2.glb');
         flagship.ai();
         bodyManager.add(flagship);
         const fleet = [];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 1000; i++) {
             const fleetShip = new Ship();
-            fleetShip.model = '/models/ship2.glb';
+            fleetShip.setRandomMesh();
             fleetShip.ai();
             bodyManager.add(fleetShip);
         }

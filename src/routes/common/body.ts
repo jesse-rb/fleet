@@ -1,5 +1,6 @@
-import { Vector3, type Scene } from 'three';
+import { Mesh, Vector3, type Scene } from 'three';
 import type { Point } from './common'
+import { loader, scene } from './three';
 
 export default class Body implements Body {
     // Fundamentals
@@ -14,7 +15,8 @@ export default class Body implements Body {
 
     // Threejs
     model:string|null = null;
-    private scene:THREE.Scene|null = null;
+
+    private scene:Scene|Mesh|null = null;
 
     constructor(pos:Point={x:0,y:0,z:0}, rot:Point={x:0,y:0,z:0}, vel:Vector3=new Vector3(0, 0, 0), velRot:Vector3=new Vector3(0, 0, 0), thrust:Vector3=new Vector3(0, 0, 0), thrustRot:Vector3=new Vector3(0, 0, 0), mass:number=1) {
         this.position = pos;
@@ -26,13 +28,23 @@ export default class Body implements Body {
         this.mass = mass;
     }
 
-    get getScene():THREE.Scene|null {
+    get getScene():THREE.Scene|Mesh|null {
         return this.scene;
     }
 
-    setScene(scene:Scene) {
+    setScene(scene:Scene|Mesh) {
         this.scene = scene;
         this.updateScene();
+    }
+
+    setModel(model:string) {
+        const _this = this;
+        this.model = model;
+        loader.load(this.model , function ( gltf:any ) {
+            const bodyScene:Scene = gltf.scene;
+            _this.setScene(bodyScene);
+            scene.add( bodyScene );
+        }, undefined, ( error:any ) => console.error( error ));
     }
 
     private updateScene() {

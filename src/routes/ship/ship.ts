@@ -1,6 +1,6 @@
-import { Vector3 } from 'three';
+import { BoxGeometry, Mesh, MeshBasicMaterial, Vector3 } from 'three';
 import Body from '../common/body';
-import { getForwardVector3, getRightVector3 } from '../common/three';
+import { getForwardVector3, getRightVector3, scene } from '../common/three';
 
 export default class Ship extends Body {
 
@@ -15,6 +15,16 @@ export default class Ship extends Body {
             this.thrustRotational.randomDirection().multiplyScalar(0.0005);
         }
         requestAnimationFrame(()=>this.ai());
+    }
+
+    setRandomMesh() {
+        const geometry = new BoxGeometry( 1, 1, 1 ); 
+        const material = new MeshBasicMaterial( {color: 0x00ff00} ); 
+        const cube = new Mesh( geometry, material );
+
+        this.setScene(cube);
+        
+        scene.add(cube);
     }
 
 }
